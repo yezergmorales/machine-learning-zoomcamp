@@ -4,7 +4,7 @@
 import requests
 
 
-url = 'http://localhost:9696/predict'
+url = 'http://localhost:8000/predict'
 
 customer_id = 'xyz-123'
 customer = {

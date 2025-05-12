@@ -1,15 +1,26 @@
-FROM python:3.8.12-slim
+# Use an official Python runtime as a parent image
+ARG PYTHON_VERSION=3.12.3
+FROM python:${PYTHON_VERSION}-slim AS base
 
-RUN pip install pipenv
-
+# Set the working directory in the container
 WORKDIR /app
 
-COPY ["Pipfile", "Pipfile.lock", "./"]
+# Copy the requirements file into the container at /app
+COPY requirements.txt .
 
-RUN pipenv install --system --deploy
+# Install any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-COPY ["predict.py", "model_C=1.0.bin", "./"]
+# Copy the application code and model file into the container at /app
+COPY predict.py .
+COPY model_C=1.0.bin .
 
-EXPOSE 9696
+# Make port 8000 available to the world outside this container
+EXPOSE 8000
 
-ENTRYPOINT ["gunicorn", "--bind=0.0.0.0:9696", "predict:app"]
+# Define environment variable (optional, good practice)
+ENV PYTHONUNBUFFERED=1
+
+# Run uvicorn when the container launches
+# Use 0.0.0.0 to ensure the server is accessible from outside the container
+CMD ["uvicorn", "predict:app", "--host", "0.0.0.0", "--port", "8000"]
